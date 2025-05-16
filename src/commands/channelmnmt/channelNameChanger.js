@@ -39,9 +39,9 @@ module.exports = {
 		if (channel.id === interaction.channel.id) {
 			return interaction.reply('You cannot set the same channel as the coworking channel.');
 		}
-		const workingHoursTask = workingHoursTaskFactory(interaction);
-		const nighttimeTask = nighttimeTaskFactory(interaction);
-		const weekendTask = weekendTaskFactory(interaction);
+		const workingHoursTask = workingHoursTaskFactory(channel);
+		const nighttimeTask = nighttimeTaskFactory(channel);
+		const weekendTask = weekendTaskFactory(channel);
 
 		workingHoursTask.start();
 		nighttimeTask.start();
@@ -69,25 +69,27 @@ module.exports = {
 			else if (mostRecent === thirdPrev.getTime()) {
 				channel.setName(CHANNEL_NAME_WEEKEND);
 			}
+
+			interaction.reply(`Action scheduled for ${channel.name}`);
+			console.log("AAAA")
 		}
 		catch (error) {
 			console.error('Error scheduling tasks:', error);
 			return interaction.reply('An error occurred while scheduling tasks.');
 		}
 
-		return interaction.reply(`Tasks scheduled for ${channel.name}`);
 	},
 };
 
-const workingHoursTaskFactory = (interaction) => cron.schedule(WORKING_START_HOUR, () => {
-	interaction.options.getChannel('channel').setName(CHANNEL_NAME_WORKING_HOURS);
-	interaction.reply(`Channel name changed to ${CHANNEL_NAME_WORKING_HOURS}`);
+const workingHoursTaskFactory = (channel) => cron.schedule(WORKING_START_HOUR, () => {
+	channel.setName(CHANNEL_NAME_WORKING_HOURS);
+	channel.send(`Channel name changed to ${CHANNEL_NAME_WORKING_HOURS}`);
 });
-const nighttimeTaskFactory = (interaction) => cron.schedule(WORKING_END_HOUR_REGULAR, () => {
-	interaction.options.getChannel('channel').setName(CHANNEL_NAME_NIGHTTIME);
-	interaction.reply(`Channel name changed to ${CHANNEL_NAME_NIGHTTIME}`);
+const nighttimeTaskFactory = (channel) => cron.schedule(WORKING_END_HOUR_REGULAR, () => {
+	channel.setName(CHANNEL_NAME_NIGHTTIME);
+	channel.send(`Channel name changed to ${CHANNEL_NAME_NIGHTTIME}`);
 });
-const weekendTaskFactory = (interaction) => cron.schedule(WORKING_END_HOUR_FRIDAY, () => {
-	interaction.options.getChannel('channel').setName(CHANNEL_NAME_WEEKEND);
-	interaction.reply(`Channel name changed to ${CHANNEL_NAME_WEEKEND}`);
+const weekendTaskFactory = (channel) => cron.schedule(WORKING_END_HOUR_FRIDAY, () => {
+	channel.setName(CHANNEL_NAME_WEEKEND);
+	channel.send(`Channel name changed to ${CHANNEL_NAME_WEEKEND}`);
 });
